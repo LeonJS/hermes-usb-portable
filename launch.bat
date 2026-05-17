@@ -6,7 +6,7 @@ REM Hermes Agent - Portable Launcher (Windows)
 REM ============================================================================
 REM Double-click this file to launch Hermes.
 REM On first run, it downloads ~600MB of runtime files automatically.
-REM All data stays in the "data\" folder — nothing touches the host computer.
+REM All data stays in the "data\" folder - nothing touches the host computer.
 REM ============================================================================
 
 REM Resolve portable root (directory containing this script)
@@ -40,7 +40,7 @@ if not exist "%RUNTIME_DIR%\ready.flag" (
 )
 
 REM ---------------------------------------------------------------------------
-REM Environment isolation — keep everything inside the portable folder
+REM Environment isolation - keep everything inside the portable folder
 REM ---------------------------------------------------------------------------
 set "VIRTUAL_ENV=%RUNTIME_DIR%\venv"
 set "PATH=%VIRTUAL_ENV%\Scripts;%RUNTIME_DIR%\python;%RUNTIME_DIR%\python\Scripts;%RUNTIME_DIR%\node;%RUNTIME_DIR%\uv;%RUNTIME_DIR%\bin;%PATH%"
@@ -67,4 +67,11 @@ if not exist "%SRC_DIR%\hermes-agent" (
 )
 
 cd /d "%SRC_DIR%\hermes-agent"
-hermes %*
+
+REM Strip "hermes" from the start of arguments if user typed "launch.bat hermes setup"
+set "ARGS=%*"
+if /I "%~1"=="hermes" (
+    set "ARGS=%ARGS:~7%"
+)
+hermes %ARGS%
+exit /b

@@ -92,4 +92,10 @@ if [ ! -d "$SRC_DIR/hermes-agent" ]; then
 fi
 
 cd "$SRC_DIR/hermes-agent"
+
+# Strip "hermes" from the start of arguments if user typed "launch.sh hermes setup"
+if [ "$1" = "hermes" ] || [ "$1" = "HERMES" ]; then
+    shift
+fi
+
 hermes "$@"
