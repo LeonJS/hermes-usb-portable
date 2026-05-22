@@ -335,7 +335,7 @@ echo "        This may take 3-10 minutes depending on your connection."
 VENV_PYTHON="$VENV_DIR/bin/python"
 
 # Bug fix: bare $? check doesn't work under set -e; use if ! pattern instead
-if ! "$UV_EXE" pip install --python "$VENV_PYTHON" -e "$SRC_DIR/hermes-agent[all]"; then
+if ! "$UV_EXE" pip install --python "$VENV_PYTHON" --link-mode=copy -e "$SRC_DIR/hermes-agent[all]"; then
     echo "[ERROR] Failed to install Hermes dependencies"
     exit 1
 fi
@@ -350,7 +350,7 @@ done_msg "Dependencies installed"
 # so Telegram works out of the box.
 # ---------------------------------------------------------------------------
 step "Installing messaging dependencies (Telegram) ..."
-if "$UV_EXE" pip install --python "$VENV_PYTHON" "python-telegram-bot[webhooks]==22.6"; then
+if "$UV_EXE" pip install --python "$VENV_PYTHON" --link-mode=copy "python-telegram-bot[webhooks]==22.6"; then
     done_msg "python-telegram-bot ready"
 else
     warn "python-telegram-bot install failed - will retry on first use"

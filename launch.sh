@@ -66,9 +66,53 @@ fi
 
 # ---------------------------------------------------------------------------
 # Environment isolation — keep everything inside the portable folder
+# (except the venv, which must live on a local FS to avoid exFAT hardlink
+# limitations — see scripts/setup-unix.sh for details)
 # ---------------------------------------------------------------------------
+
+# Read the venv path from the pointer file written during setup.
+if [ -f "$RUNTIME_DIR/venv.path" ]; then
+    VIRTUAL_ENV="$(cat "$RUNTIME_DIR/venv.path")"
+else
+    # Fallback for older setups that put the venv on the drive.
+    VIRTUAL_ENV="$RUNTIME_DIR/venv"
+fi
+
+# If the venv is missing (e.g. after a reboot purged $TMPDIR), rebuild it.
+if [ ! -x "$VIRTUAL_ENV/bin/python" ]; then
+    echo ""
+    echo "[INFO] Local venv not found (temp was likely cleared). Rebuilding ..."
+    echo "       This is fast because packages are cached on the drive."
+    UV_EXE="$RUNTIME_DIR/uv/uv"
+    PYTHON_EXE="$RUNTIME_DIR/python/bin/python3"
+    SRC_DIR="$PORTABLE_ROOT/src"
+
+    if [ "$PLATFORM" = "macos" ]; then
+        LOCAL_BASE="${TMPDIR:-/tmp}"
+    else
+        LOCAL_BASE="/tmp"
+    fi
+
+    DRIVE_ID="$(echo "$RUNTIME_DIR" | md5sum 2>/dev/null | cut -c1-8 || echo "hermes")"
+    VIRTUAL_ENV="${LOCAL_BASE}/hermes-portable-venv-${DRIVE_ID}"
+    export UV_CACHE_DIR="${LOCAL_BASE}/hermes-uv-cache-${DRIVE_ID}"
+    mkdir -p "$UV_CACHE_DIR"
+
+    # Save updated path
+    echo "$VIRTUAL_ENV" > "$RUNTIME_DIR/venv.path"
+
+    rm -rf "$VIRTUAL_ENV"
+    if ! "$UV_EXE" venv "$VIRTUAL_ENV" --python "$PYTHON_EXE" --seed 2>/dev/null; then
+        "$UV_EXE" venv "$VIRTUAL_ENV" --python "$PYTHON_EXE"
+    fi
+    "$UV_EXE" pip install --python "$VIRTUAL_ENV/bin/python" --link-mode=copy \
+        -e "$SRC_DIR/hermes-agent[all]" \
+        "python-telegram-bot[webhooks]==22.6" 2>/dev/null || true
+    echo "[OK]    Venv rebuilt."
+fi
+
 export HERMES_HOME="$HERMES_HOME"
-export VIRTUAL_ENV="$RUNTIME_DIR/venv"
+export VIRTUAL_ENV
 export PATH="$VIRTUAL_ENV/bin:$RUNTIME_DIR/python/bin:$RUNTIME_DIR/node/bin:$RUNTIME_DIR/uv:$RUNTIME_DIR/bin:$PATH"
 export PYTHONNOUSERSITE=1
 export PYTHONHOME=""
