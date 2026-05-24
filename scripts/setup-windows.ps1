@@ -70,11 +70,32 @@ function Download-File($Url, $OutFile) {
 
     # Prefer curl.exe for native progress bar (speed, percent, time left, time spent)
     if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
-        $curlArgs = @("-L", "-f", "--retry", "3", "--connect-timeout", "30", "--max-time", "600", "-o", $OutFile, $Url)
+        $curlArgs = @(
+            "-L", "-f", "--retry", "3",
+            "--connect-timeout", "30", "--max-time", "600",
+            "--ssl-no-revoke",      # Prevent CRL revocation check failures on Windows
+            "-o", $OutFile, $Url
+        )
         & curl.exe @curlArgs
         if ($LASTEXITCODE -ne 0) {
-            if (Test-Path $OutFile) { Remove-Item $OutFile -Force }
-            throw "curl.exe failed with exit code " + $LASTEXITCODE + " while downloading " + $name
+            # exit code 35 = CURLE_SSL_CONNECT_ERROR — SSL/TLS handshake failure,
+            # common on Windows with stale CRLs, AV SSL inspection, or proxy.
+            # Fall back to Invoke-WebRequest which uses the system certificate store.
+            if ($LASTEXITCODE -eq 35) {
+                Write-Host "        curl SSL error (exit 35) — retrying with Invoke-WebRequest ..." -ForegroundColor Yellow
+                Remove-Item $OutFile -Force -ErrorAction SilentlyContinue
+                $ProgressPreference = 'Continue'
+                try {
+                    Invoke-WebRequest -Uri $Url -OutFile $OutFile -UseBasicParsing -TimeoutSec 600
+                    Write-Host "        Download via Invoke-WebRequest succeeded." -ForegroundColor Green
+                } catch {
+                    if (Test-Path $OutFile) { Remove-Item $OutFile -Force }
+                    throw "Invoke-WebRequest also failed for " + $name + ": " + $_
+                }
+            } else {
+                if (Test-Path $OutFile) { Remove-Item $OutFile -Force }
+                throw "curl.exe failed with exit code " + $LASTEXITCODE + " while downloading " + $name
+            }
         }
     } else {
         $ProgressPreference = 'Continue'
