@@ -339,8 +339,11 @@ step "Installing Hermes Python dependencies ..."
 echo "        This may take 3-10 minutes depending on your connection."
 VENV_PYTHON="$VENV_DIR/bin/python"
 
+# uv on FAT/exFAT cannot create symlinks — set this before any pip install
+export UV_NO_SYMLINKS=1
+
 # Bug fix: bare $? check doesn't work under set -e; use if ! pattern instead
-if ! "$UV_EXE" pip install --python "$VENV_PYTHON" --link-mode=copy -e "$SRC_DIR/hermes-agent[all]"; then
+if ! "$UV_EXE" pip install --python "$VENV_PYTHON" --link-mode=copy "$SRC_DIR/hermes-agent[all]"; then
     echo "[ERROR] Failed to install Hermes dependencies"
     exit 1
 fi
