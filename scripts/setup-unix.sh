@@ -326,7 +326,9 @@ if [ ! -x "$PYTHON_EXE" ]; then
 fi
 
 # Bug fix: bare $? check doesn't work under set -e; use if ! pattern instead
-if ! "$UV_EXE" venv "$VENV_DIR" --python "$PYTHON_EXE"; then
+# --no-symlinks: required on FAT/exFAT USB — default macOS venv uses symlinks for
+# stdlib/site-packages which fail with EOPNOTSUPP on filesystems without symlink support
+if ! "$UV_EXE" venv "$VENV_DIR" --python "$PYTHON_EXE" --no-symlinks; then
     echo "[ERROR] Failed to create virtual environment"
     exit 1
 fi
