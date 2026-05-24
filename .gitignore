@@ -4,3 +4,8 @@ data/
 src/
 *.flag
 *.log
+
+# Editor/tool config (may contain tokens/secrets)
+.mcp.json
+.mcp/
+*.code-workspace
