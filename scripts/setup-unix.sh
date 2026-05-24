@@ -341,7 +341,11 @@ echo "        This may take 3-10 minutes depending on your connection."
 VENV_PYTHON="$VENV_DIR/bin/python"
 
 # uv on FAT/exFAT cannot create symlinks — set this before any pip install
+# UV_NO_CACHE=1: required on FAT/exFAT because macOS auto-creates ._ AppleDouble
+# metadata files when extracting archives, which corrupt the uv wheel cache entry
+# and cause "RECORD doesn't match wheel contents" errors on re-install.
 export UV_NO_SYMLINKS=1
+export UV_NO_CACHE=1
 
 # Bug fix: bare $? check doesn't work under set -e; use if ! pattern instead
 if ! "$UV_EXE" pip install --python "$VENV_PYTHON" --link-mode=copy "$SRC_DIR/hermes-agent[all]"; then
