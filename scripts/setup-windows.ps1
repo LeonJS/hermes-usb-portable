@@ -162,6 +162,15 @@ if (Test-Path $readyFlag) {
     if ($missing) {
         Write-Warn "ready.flag exists but core files are missing - restarting setup ..."
         Remove-Item $readyFlag -Force
+        # Clean up partial runtime state so re-run starts fresh
+        $runtimeItems = @("python", "node", "uv", "git", "venv", "python.tar.gz",
+                         "node.zip", "uv.zip", "rg.zip", "git.zip", "source.zip")
+        foreach ($item in $runtimeItems) {
+            $path = Join-Path $RuntimeDir $item
+            if (Test-Path $path) {
+                Remove-Item $path -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
     }
 }
 
@@ -256,7 +265,7 @@ Write-Step "Installing Hermes Python dependencies ..."
 Write-Host "        This may take 3-10 minutes depending on your connection."
 $venvPython = Join-Path $venvDir "Scripts\python.exe"
 
-& $uvExe pip install --python $venvPython -e "$destSrc[all]"
+& $uvExe pip install --python $venvPython -e "${destSrc}[all]"
 if ($LASTEXITCODE -ne 0) { throw "Failed to install Hermes dependencies" }
 Write-Done "Dependencies installed"
 

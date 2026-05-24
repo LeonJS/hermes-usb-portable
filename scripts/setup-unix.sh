@@ -47,6 +47,11 @@ TMP_DIR="$RUNTIME_DIR/_tmp"
 
 mkdir -p "$RUNTIME_DIR" "$SRC_DIR" "$BIN_DIR" "$TMP_DIR"
 
+# Minimal warn stub — full function defined in Helpers section below
+warn() {
+    echo "[WARN]  $1"
+}
+
 # ---------------------------------------------------------------------------
 # Health check: if ready.flag exists but core files are missing, start fresh
 # ---------------------------------------------------------------------------
