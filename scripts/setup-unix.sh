@@ -71,15 +71,16 @@ case "$ARCH_RAW" in
     *)     PYTHON_ARCH="$ARCH_RAW" ;;
 esac
 
+UV_VERSION="0.11.16"
 if [ "$PLATFORM" = "macos" ]; then
-    PYTHON_URL="https://github.com/astral-sh/python-build-standalone/releases/download/20260510/cpython-3.11.15+20260510-${PYTHON_ARCH}-apple-darwin-install_only.tar.gz"
+    PYTHON_URL="https://github.com/astral-sh/python-build-standalone/releases/download/20260510/cpython-3.11.15+202****0510-${PYTHON_ARCH}-apple-darwin-install_only.tar.gz"
     NODE_URL="https://nodejs.org/dist/v22.14.0/node-v22.14.0-darwin-${ARCH}.tar.gz"
-    UV_URL="https://github.com/astral-sh/uv/releases/download/0.7.8/uv-${PYTHON_ARCH}-apple-darwin.tar.gz"
+    UV_URL="https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-${PYTHON_ARCH}-apple-darwin.tar.gz"
     RG_URL="https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep-14.1.1-${PYTHON_ARCH}-apple-darwin.tar.gz"
 else
-    PYTHON_URL="https://github.com/astral-sh/python-build-standalone/releases/download/20260510/cpython-3.11.15+20260510-${ARCH_RAW}-unknown-linux-gnu-install_only.tar.gz"
+    PYTHON_URL="https://github.com/astral-sh/python-build-standalone/releases/download/20260510/cpython-3.11.15+202****0510-${ARCH_RAW}-unknown-linux-gnu-install_only.tar.gz"
     NODE_URL="https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-${ARCH}.tar.xz"
-    UV_URL="https://github.com/astral-sh/uv/releases/download/0.7.8/uv-${ARCH_RAW}-unknown-linux-gnu.tar.gz"
+    UV_URL="https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-${ARCH_RAW}-unknown-linux-gnu.tar.gz"
     RG_URL="https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep-14.1.1-${ARCH_RAW}-unknown-linux-musl.tar.gz"
 fi
 
