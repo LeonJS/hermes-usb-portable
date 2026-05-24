@@ -78,11 +78,11 @@ function Download-File($Url, $OutFile) {
         )
         & curl.exe @curlArgs
         if ($LASTEXITCODE -ne 0) {
-            # exit code 35 = CURLE_SSL_CONNECT_ERROR — SSL/TLS handshake failure,
+            # exit code 35 = CURLE_SSL_CONNECT_ERROR -- SSL/TLS handshake failure,
             # common on Windows with stale CRLs, AV SSL inspection, or proxy.
             # Fall back to Invoke-WebRequest which uses the system certificate store.
             if ($LASTEXITCODE -eq 35) {
-                Write-Host "        curl SSL error (exit 35) — retrying with Invoke-WebRequest ..." -ForegroundColor Yellow
+                Write-Host "        curl SSL error (exit 35) -- retrying with Invoke-WebRequest ..." -ForegroundColor Yellow
                 Remove-Item $OutFile -Force -ErrorAction SilentlyContinue
                 $ProgressPreference = 'Continue'
                 try {
